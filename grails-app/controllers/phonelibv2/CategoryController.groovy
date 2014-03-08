@@ -202,61 +202,45 @@ class CategoryController {
 		}
 		
 		def phoneOwnCategoryList(){
+			print(params)
 			def principal = SecurityUtils.subject?.principal
-			def user = ShiroUser.findByUsername(principal)
-			
-			def bookInstance = user.own.book
+			def userInstance = ShiroUser.findByUsername(principal)
+			def bookInstance = userInstance.own.book
 			List categoryList = bookInstance.category
 			categoryList.unique()
-		//	def resquestCname=["categroy"]
+			
 			def count = categoryList.size()
 			def resquestArray = []
 			JSONObject requestJsonObject = new JSONObject()
+			print(categoryList)
 			categoryList.each{
 				params.max = Math.min(params.max ? params.int('max') : 5, 100)
-				def c = Book.createCriteria()
+				def c = Own.createCriteria()
 				String cname = it.cname
 				def searchByCategory = {
-					category{
-						eq('cname',cname)
+					book{
+						category{
+							eq('cname',cname)
+						}
+					}
+			
+					user{
+						eq('username',userInstance.username)
+				
 					}
 				}
-				def books = c.list(params,searchByCategory)
-				int bookCount = books.totalCount
+				def ownBook = c.list(params,searchByCategory)
+				print(ownBook)
+				int bookCount = ownBook.totalCount
 				String bookNames = ""
-				books.each {
-					bookNames +=it.title+","
+				ownBook.each {
+					bookNames +=it.book.title+","
 				}
 				resquestArray.add('id':it.id,'cname':"${it.cname}",'book':bookNames ,bookCount:bookCount)
 			}
 			requestJsonObject.put('categoryCount', categoryList.size())
 			requestJsonObject.putOpt('category', resquestArray)
-			
-			/*categoryList.each {
-				def resquestBook=["book"]
-				params.max = Math.min(params.max ? params.int('max') : 5, 100)
-				def c = Book.createCriteria()
-				String cname = it.cname
-				def searchByCategory = {
-					category{
-						eq('cname',cname)
-					}
-				}
-				def books = c.list(params,searchByCategory)
-				def bookCount = books.totalCount
-				books.each {
-					resquestBook.add('title':"${it.title}")
-				}
-				resquestCname.add('id':"${it.id}",'cname':"${it.cname}",'book':"${resquestBook}" ,bookCount:"${bookCount}")
-				
-			}
-			print(resquestCname)*/
-			//categoryInstance.remove("books")
-			//categoryJson.remove(categoryJson.class)
-		//	JsonBuilder category = categoryInstance
-		//	print (category.toString())
-		//	category.remove('class')
-		//	print(category)
+			print(requestJsonObject)
 			render(contentType:"text/json"){
 				requestJsonObject
 			}

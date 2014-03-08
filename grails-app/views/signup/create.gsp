@@ -7,7 +7,7 @@
 		<title>欢迎加入我们</title>
 	</head>
 	<body>
-		
+
 	 
 	 
 	 
@@ -31,7 +31,7 @@
 				</fieldset>
 				<fieldset class="buttons">
 				<br/>
-					<g:submitButton name="create" class="btn" value="   注册    " />
+					<input type="submit" value="注册" class="btn" />
 					
 				</fieldset>
 			</g:form>

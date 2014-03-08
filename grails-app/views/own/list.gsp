@@ -23,32 +23,48 @@
 	margin-left: 6px;
 	margin-top: 1px;
 	text-indent: 36px;
-	width: 160px;
+	width: 140px;
+}
+.prevLink{
+padding: 2px 5px;
+border-width: 1px;
+border-style: solid;
+border-color: rgb(238, 238, 238);
+margin: 2px;
+color: rgb(3, 108, 180);
+text-decoration: none;
+}
+.currentStep{
+padding: 2px 5px;
+border-width: 1px;
+border-style: solid;
+border-color: rgb(3, 108, 180);
+font-weight: bold;
+margin: 2px;
+color: rgb(255, 255, 255);
+background-color: rgb(3, 108, 180);
+}
+.nextLink{
+padding: 2px 5px;
+border-width: 1px;
+border-style: solid;
+border-color: rgb(238, 238, 238);
+margin: 2px;
+color: rgb(3, 108, 180);
+text-decoration: none;
+}
+.step{
+padding: 2px 5px;
+border-width: 1px;
+border-style: solid;
+border-color: rgb(238, 238, 238);
+margin: 2px;
+color: rgb(3, 108, 180);
+text-decoration: none;
 }
 </style>
 </head>
 <body>
-<!--  
-	<div>
-		<div class="span3">
-			<ul class="well sidebar-nav">
-				<li class="nav-header"><h3>图书类别</h3></li>
-
-				<!-- 分类加载--><!--
-				<g:link url="/phonelibV2/own/list">全部</g:link>
-
-				<g:each in="${categoryInstanceList}" status="i"
-					var="categoryInstance">
-
-					<li class="nav" style="list-style-type: none"><g:link
-							controller="own" action="category" id="${categoryInstance.id}">
-							${categoryInstance.cname}
-						</g:link></li>
-
-				</g:each>
-			</ul>
-		</div>
-		-->
 		
 			<div>
 		<div class="span3">
@@ -56,16 +72,18 @@
 				<li class="nav-header"><h3>图书类别</h3></li>
 
 				<!-- 分类加载-->
-				<li class="categpry"><g:link url="/phonelibV2/own/list">全部</g:link>
+				<g:if test="${params.id==null}"><li class="category" style="background-image:url(/phonelibV2/images/category_action.jpg);width: 160px;"></g:if>
+						<g:else><li class="category"></g:else><g:link url="/phonelibV2/own/list">全部</g:link>
 				</li>
 				<g:each in="${categoryInstanceList}" status="i"
-					var="categoryInstance">
+					var="category">
 					<div>
-						<li class="category"><g:link controller="own"
-								action="category" id="${categoryInstance.id}">
-								${categoryInstance.cname}
+						<g:if test="${(""+category.categoryIntance.id)==params.id}"><li class="category" style="background-image:url(/phonelibV2/images/category_action.jpg);width: 160px;"></g:if>
+						<g:else><li class="category"></g:else>
+							<g:link controller="own"
+								action="list" id="${category.categoryIntance.id}">
+								${category.categoryIntance.cname+" "+category.bookCount}
 							</g:link></li>
-
 					</div>
 				</g:each>
 			</ul>
@@ -74,14 +92,15 @@
 
 
 		<div class="span9">
-			<g:link action="create">创建新书</g:link>
-			<g:form class="form-search" action="search">
-				<g:textField name="bookName" />
+			
+			<div id="list-book" class="content scaffold-list" role="main">
+			<h1>图书列表</h1>
+			
+			 <g:form class="form-search" action="search">
+				&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">new:</span><g:link action="create">创建一本新书</g:link>&nbsp;&nbsp;&nbsp;&nbsp;   <g:textField name="bookName" />
 				<g:submitButton type="submit" name="搜索" class="btn" />
 			</g:form>
-
-			<div id="list-book" class="content scaffold-list" role="main">
-				<h1>图书列表</h1>
+			
 				<g:if test="${flash.message}">
 					<div class="message" role="status">
 						${flash.message}
@@ -93,11 +112,11 @@
 
 					<g:each in="${ownInstanceList}" status="i" var="ownInstance">
 
-						<li style="margin: 10px 7px 5px 7px;"><a class="thumbnail"
+							<li style="width:130px; height:220px;margin: 10px 7px 5px 7px;"><a class="thumbnail"
 							data-toggle="modal" data-target="#myModal${ownInstance.book.isbn13}"
 							href="javascript:">
 								<div id=${ownInstance.book.isbn13}.img></div>
-								<div class="caption" id=${ownInstance.book.isbn13}.title></div>
+								<div class="caption" id=${ownInstance.book.isbn13}.title style="height:27px; width:115px;">正在加载。。。</div>
 
 						</a>
 
@@ -121,7 +140,10 @@
 												<div class="span9">
 													分类：
 													<div id=${ownInstance.book.isbn13}.x.dialog></div>
-													isbn:${ownInstance.book.isbn13}
+													isbn:${ownInstance.book.isbn13}</br>
+													图书状态:
+														<g:if test="${ownInstance?.bookStatus==0}">在库</g:if>
+														<g:if test="${ownInstance?.bookStatus!=0}">已借</g:if>
 													<div id=${ownInstance.book.isbn13}.author.dialog></div>
 													<div id=${ownInstance.book.isbn13}.publisher.dialog></div>
 													<div id=${ownInstance.book.isbn13}.pubdate.dialog></div>
@@ -158,8 +180,8 @@
 						        var Title=re.title;
 						        var bookTitle=re.title;
 						        var len=Title.length;
-						        if(len>6){
-						        	var bookTitle = Title.slice(0, 5);
+						        if(len>15){
+						        	var bookTitle = Title.slice(0, 15);
 							        }
 						       document.getElementById(re.isbn13+'.title').innerHTML=bookTitle; 
 						       document.getElementById(re.isbn13+'.img').innerHTML="<img style=\"height:160px; width:120px;\" src="+re.images.medium+">";
@@ -176,9 +198,7 @@
 					</g:each>
 				</ul>
 
-				<div class="pagination">
-					<g:paginate total="${ownInstanceTotal}" />
-				</div>
+				<g:paginate total="${ownInstanceTotal}" params="${params}" />
 			</div>
 		</div>
 <!-- 

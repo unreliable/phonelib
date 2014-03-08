@@ -1,8 +1,8 @@
 dataSource {
     pooled = true
     driverClassName = "com.mysql.jdbc.Driver"
-    username = "zyk"
-    password = "18273716526"
+    username = "root"
+    password = "admin"
 }
 hibernate {
     cache.use_second_level_cache = true
@@ -14,7 +14,8 @@ environments {
     development {
         dataSource {
             dbCreate = "update" // one of 'create', 'create-drop', 'update', 'validate', ''
-            url = "jdbc:mysql://localhost:3306/phonelibV2test"
+            url = "jdbc:mysql://localhost:3306/phonelibV2test?useUnicode=true&characterEncoding=UTF-8"
+			
         }
     }
     test {
@@ -41,3 +42,18 @@ environments {
         }
     }
 }
+
+
+/*production {
+	def envVar = System.env.VCAP_SERVICES
+	def credentials = envVar?grails.converters.JSON.parse(envVar)["mysql-5.1"][0]["credentials"]:null
+ 
+	dataSource {
+	   pooled = true
+	   dbCreate = "update"
+	   driverClassName = "com.mysql.jdbc.Driver"
+	   url =  credentials?"jdbc:mysql://${credentials.hostname}:${credentials.port}/${credentials.name}?useUnicode=yes&characterEncoding=UTF-8":""
+	   username = credentials?credentials.username:""
+	   password = credentails?credentials.password:""
+	}
+ }*/
