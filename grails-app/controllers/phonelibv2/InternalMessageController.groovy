@@ -2,134 +2,59 @@ package phonelibv2
 
 import org.springframework.dao.DataIntegrityViolationException
 import org.apache.shiro.SecurityUtils
-import com.sun.beans.decoder.FalseElementHandler;
+//import com.sun.beans.decoder.FalseElementHandler;
 
 class InternalMessageController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
-    def bgindex() {
-        redirect(action: "bglist", params: params)
-    }
-
-    def bglist() {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [internalMessageInstanceList: InternalMessage.list(params), internalMessageInstanceTotal: InternalMessage.count()]
-    }
-
-    def bgcreate() {
-        [internalMessageInstance: new InternalMessage(params)]
-    }
-
-    def bgsave() {
-        def internalMessageInstance = new InternalMessage(params)
-        if (!internalMessageInstance.save(flush: true)) {
-            render(view: "bgcreate", model: [internalMessageInstance: internalMessageInstance])
-            return
-        }
-
-		flash.message = message(code: 'default.created.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), internalMessageInstance.id])
-        redirect(action: "bgshow", id: internalMessageInstance.id)
-    }
-
-    def bgshow() {
-        def internalMessageInstance = InternalMessage.get(params.id)
-        if (!internalMessageInstance) {
-			flash.message = message(code: 'default.not.found.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), params.id])
-            redirect(action: "bglist")
-            return
-        }
-
-        [internalMessageInstance: internalMessageInstance]
-    }
-
-    def bgedit() {
-        def internalMessageInstance = InternalMessage.get(params.id)
-        if (!internalMessageInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), params.id])
-            redirect(action: "bglist")
-            return
-        }
-
-        [internalMessageInstance: internalMessageInstance]
-    }
-
-    def bgupdate() {
-        def internalMessageInstance = InternalMessage.get(params.id)
-        if (!internalMessageInstance) {
-            flash.message = message(code: 'default.not.found.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), params.id])
-            redirect(action: "bglist")
-            return
-        }
-
-        if (params.version) {
-            def version = params.version.toLong()
-            if (internalMessageInstance.version > version) {
-                internalMessageInstance.errors.rejectValue("version", "default.optimistic.locking.failure",
-                          [message(code: 'internalMessage.label', default: 'InternalMessage')] as Object[],
-                          "Another user has updated this InternalMessage while you were editing")
-                render(view: "bgedit", model: [internalMessageInstance: internalMessageInstance])
-                return
-            }
-        }
-
-        internalMessageInstance.properties = params
-
-        if (!internalMessageInstance.save(flush: true)) {
-            render(view: "bgedit", model: [internalMessageInstance: internalMessageInstance])
-            return
-        }
-
-		flash.message = message(code: 'default.updated.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), internalMessageInstance.id])
-        redirect(action: "bgshow", id: internalMessageInstance.id)
-    }
-
-    def bgdelete() {
-        def internalMessageInstance = InternalMessage.get(params.id)
-        if (!internalMessageInstance) {
-			flash.message = message(code: 'default.not.found.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), params.id])
-            redirect(action: "bglist")
-            return
-        }
-
-        try {
-            internalMessageInstance.delete(flush: true)
-			flash.message = message(code: 'default.deleted.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), params.id])
-            redirect(action: "bglist")
-        }
-        catch (DataIntegrityViolationException e) {
-			flash.message = message(code: 'default.not.deleted.message', args: [message(code: 'internalMessage.label', default: 'InternalMessage'), params.id])
-            redirect(action: "bgshow", id: params.id)
-        }
-    }
-	
-	
 		def index() {
 			redirect(action: "list", params: params)
 		}
 	
 		def list() {//鏀朵欢绠�
 			params.max = Math.min(params.max ? params.int('max') : 10, 100)
-			def principal = SecurityUtils.subject?.principal
-			def recipient = ShiroUser.findByUsername(principal)
-			def internalMessage = recipient.recipient
-//			[internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count()]
+			if (!params.sort) params.sort = "statue"
 			
-			if(!principal){//判断是否登录
-				print("1")
-				return [internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count()]
+			def principal = SecurityUtils.subject?.principal
+			def userInstance = ShiroUser.findByUsername(principal)
+			
+			def c = InternalMessage.createCriteria()
+			def searchRecipientMessage = {
+				eq('recipient',userInstance)
+				order("statue","desc")
+				order("id","desc")
 			}
-			print("2")
+			def internalMessage = c.list(params,searchRecipientMessage)
+			def internalMessageCount = internalMessage.totalCount
+			
+			/*if(internalMessageCount>10){
+				c = InternalMessage.createCriteria()
+				if(params.offset){
+					//int offset = params.offset
+					//print "111"
+					params.offset = 0
+				}else{
+				params.offset = internalMessageCount-params.max
+				}
+				print(params.offset)
+				internalMessage = c.list(params,searchRecipientMessage)
+			}
+			
+			
+			internalMessage.sort{
+				a,b ->
+				b.id <=>a.id
+			}
+			*/
 			def user=ShiroUser.findByUsername(principal)
 			if(!user?.btouxiang){//登录后，判断是否有头像
 				def touxiangUrl = "touxiang/default_avatar.jpg" //默认头像
-				print("3")
-				return [internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count(),shiroUserInstance:touxiangUrl]
+			
+				return [internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: internalMessageCount,shiroUserInstance:touxiangUrl]
 			}
 			
 			def tSize = "btouxiang" //选择头像的类型，这里是大头像
-			print("4")
-	//		println user.${tSize}  //D:\workspace-ggts\phonelibV2\web-app\images\touxiang\10\10\1385360315740_162.jpg
 			
 			def tIndex = user."${tSize}"?.indexOf("touxiang") //44,touxiang是第44位
 			def touxiang =  user."${tSize}"?.substring(tIndex)//touxiang\10\10\1385360315740_162.jpg
@@ -138,11 +63,15 @@ class InternalMessageController {
 			[internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count(),shiroUserInstance:touxiangUrl]
 		}
 		
-		def senderList() {//鍙戜欢绠�
+		def senderList() {
 			params.max = Math.min(params.max ? params.int('max') : 10, 100)
 			def principal = SecurityUtils.subject?.principal
-			def recipient = ShiroUser.findByUsername(principal)
-			def internalMessage = recipient.sender
+			def userInstance = ShiroUser.findByUsername(principal)
+			def c = InternalMessage.createCriteria()
+			def searchRecipientMessage = {
+				eq('sender',userInstance)
+			}
+			def internalMessage = c.list(params,searchRecipientMessage)
 			render(view: "list" ,model:[internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count()])
 		}
 	
@@ -250,7 +179,7 @@ class InternalMessageController {
 		
 		def borrowBookMessage(){
 			 def borrowInstance = Borrow.get(params.id)
-			 def internalMessage = "浣犲ソ锛屾垜鎯冲�闃呬綘鐨勩�${borrowInstance.book.title}銆嬭繖鏈功銆�"
+			 def internalMessage = "ni hao ${borrowInstance.book.title}銆嬭繖鏈功銆�"
 			 def statue = true//鏈鐘舵�
 			 def now = new Date()
 			 def sender = borrowInstance.borrower
@@ -313,22 +242,22 @@ class InternalMessageController {
 		}
 		
 		def backAck(){
-			print("1")
+			
 			def principal = SecurityUtils.subject?.principal
 			def userInstance=ShiroUser.findByUsername(principal)
 			def internalMessageInstance = InternalMessage.get(params.internalMessageId)
-			print("2")
+			
 			def borrowInstance = internalMessageInstance?.borrow
 			if(!internalMessageInstance){
-				print("3")
+			
 				borrowInstance = Borrow.get(params.borrowId)
 			}
-			print("5")
+			
 			if(userInstance==borrowInstance.borrower){
 				borrowInstance?.borrowerAck = true
 				if(borrowInstance?.ownerAck&&borrowInstance?.borrowerAck){
 					borrowInstance?.borrowStatus = 5//5宸插綊杩�
-					print("111111111111111111111111")
+					
 					redirect(action: "list")
 				}
 				else{
@@ -336,18 +265,31 @@ class InternalMessageController {
 				 }
 			}
 			if(userInstance==borrowInstance.owner){
-				print("6")
+			
 				borrowInstance?.ownerAck = true
-				print("7")
+				
 				if(borrowInstance?.ownerAck&&borrowInstance?.borrowerAck){
 					borrowInstance?.borrowStatus = 5//5宸插綊杩�
-					print("11111111111111111111111222222222221")
+				
 					redirect(action: "list")
 				}
 				else{
 				 redirect(action: "list")
 				 }
 			}
+		}
+		
+		def unreadMessage(){
+			def principal = SecurityUtils.subject?.principal
+			def userInstance=ShiroUser.findByUsername(principal)
+			def c = InternalMessage.createCriteria()
+			def searchUnread = {
+				eq('recipient',userInstance)
+				eq('statue',true)
+			}
+			def unreadMessage = c.list (params,searchUnread)
+			def unreadMessageCount = unreadMessage.totalCount
+			render unreadMessageCount
 		}
 	}
 	

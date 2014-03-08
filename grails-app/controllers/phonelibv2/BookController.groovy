@@ -128,10 +128,9 @@ class BookController {
 		}
 		resquestArray.bookCount.sort()
 		categoryList = []
-		resquestArray.each{
-			if(it.bookCount != 0){
-				categoryList.add(it)
-			}
+		resquestArray.sort{
+			 a,b ->
+            b.bookCount <=>  a.bookCount 
 		}
 		categoryList = resquestArray
 		

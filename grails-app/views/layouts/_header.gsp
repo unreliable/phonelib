@@ -1,3 +1,14 @@
+<script type="text/javascript">
+var t=setTimeout("load()",10)
+	function load(){
+	$.post("/phonelibV2/internalMessage/unreadMessage",
+			 function(data) {
+		 		if(data!=0){
+			 		document.getElementById('unreadMessage').innerHTML=data+"条未读";
+		 		}});
+	t=setTimeout("load()",60000)
+	}
+</script>
 <div class="navbar navbar-fixed-top">
 	<div class="navbar-inner">
 		<div class="container">
@@ -49,7 +60,7 @@
 					<g:else><li class="dropdown"></g:else>
 		<a class="dropdown-toggle"  href="/phonelibV2/InternalMessage/list">
           <i class="icon-envelope"></i> 站内信
-          <span class="badge badge-info">1</span></a></li>
+          <div class="badge badge-info" name = "unreadMessage" id ="unreadMessage"></div></a></li>
 		<li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><shiro:principal /><b class="caret"></b> </a>
 		<ul class="dropdown-menu">
 		<li > <a href="/phonelibV2/signup/accout"> <i class="icon-cog"></i> 个人设置 </a> </li>
