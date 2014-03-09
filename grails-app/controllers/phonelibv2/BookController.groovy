@@ -153,22 +153,9 @@ class BookController {
 		def bookList = c.list(params,searchBookByCategory)
 	//	render(view:"list",model:[categoryInstanceList: Category.list(),bookInstanceTotal: bookList.totalCount,bookInstanceList:bookList])
 	//	params.max = Math.min(params.max ? params.int('max') : 15, 100)
-		def principal = SecurityUtils.subject?.principal
-		if(!principal){//判断是否登录
-			print("1")
-			return [bookInstanceList: bookList,categoryInstanceList: categoryList, bookInstanceTotal: bookList.totalCount]
-		}
-		print("2")
-		def user=ShiroUser.findByUsername(principal)
-		def touxiangUrl = "touxiang/default_avatar.jpg"  //默认头像
-		if(user.btouxiang){//登录后，判断是否有头像
-			def tSize = "btouxiang" //选择头像的类型，这里是大头像
-			def tIndex = user."${tSize}"?.indexOf("touxiang") 
-			def touxiang =  user."${tSize}"?.substring(tIndex)
-			touxiangUrl = touxiang?.replace('\\', '/');            
-        }
 		
-		[bookInstanceList: bookList,categoryInstanceList: categoryList, bookInstanceTotal: bookList.totalCount,shiroUserInstance:touxiangUrl]
+		
+		[bookInstanceList: bookList,categoryInstanceList: categoryList, bookInstanceTotal: bookList.totalCount]
 	}
 
 	def create() {
@@ -381,7 +368,7 @@ class BookController {
 				
 				String tags = "{\"tags\":"+temp+"}"
 				print(temp) 
-			//	print(summary)
+			
 				params.author = author
 				params.pubdate = pubdate
 				params.imageUrl = imageUrl
@@ -389,7 +376,7 @@ class BookController {
 				params.publisher = publisher
 				params.summary = summary
 				params.tags = tags
-			//	print(params)
+			
 				def bookInstance = Book.get(it.id)
 				print(bookInstance)
 				bookInstance.properties = params

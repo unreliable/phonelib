@@ -12,10 +12,8 @@ class InternalMessageController {
 			redirect(action: "list", params: params)
 		}
 	
-		def list() {//鏀朵欢绠�
+		def list() {
 			params.max = Math.min(params.max ? params.int('max') : 10, 100)
-			if (!params.sort) params.sort = "statue"
-			
 			def principal = SecurityUtils.subject?.principal
 			def userInstance = ShiroUser.findByUsername(principal)
 			
@@ -27,40 +25,8 @@ class InternalMessageController {
 			}
 			def internalMessage = c.list(params,searchRecipientMessage)
 			def internalMessageCount = internalMessage.totalCount
-			
-			/*if(internalMessageCount>10){
-				c = InternalMessage.createCriteria()
-				if(params.offset){
-					//int offset = params.offset
-					//print "111"
-					params.offset = 0
-				}else{
-				params.offset = internalMessageCount-params.max
-				}
-				print(params.offset)
-				internalMessage = c.list(params,searchRecipientMessage)
-			}
-			
-			
-			internalMessage.sort{
-				a,b ->
-				b.id <=>a.id
-			}
-			*/
-			def user=ShiroUser.findByUsername(principal)
-			if(!user?.btouxiang){//登录后，判断是否有头像
-				def touxiangUrl = "touxiang/default_avatar.jpg" //默认头像
-			
-				return [internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: internalMessageCount,shiroUserInstance:touxiangUrl]
-			}
-			
-			def tSize = "btouxiang" //选择头像的类型，这里是大头像
-			
-			def tIndex = user."${tSize}"?.indexOf("touxiang") //44,touxiang是第44位
-			def touxiang =  user."${tSize}"?.substring(tIndex)//touxiang\10\10\1385360315740_162.jpg
-			def touxiangUrl = touxiang?.replace('\\', '/');            //touxiang/10/10/1385360315740_162.jpg
-			
-			[internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count(),shiroUserInstance:touxiangUrl]
+
+			[internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count()]
 		}
 		
 		def senderList() {
@@ -70,6 +36,7 @@ class InternalMessageController {
 			def c = InternalMessage.createCriteria()
 			def searchRecipientMessage = {
 				eq('sender',userInstance)
+				order("id","desc")
 			}
 			def internalMessage = c.list(params,searchRecipientMessage)
 			render(view: "list" ,model:[internalMessageInstanceList: internalMessage, internalMessageInstanceTotal: InternalMessage.count()])

@@ -75,15 +75,9 @@ class OwnController {
 		def c = Own.createCriteria()
 		def ownList = c.list(params,searchOwnList)
 		def ownCount = ownList.totalCount
-		def touxiangUrl = "touxiang/default_avatar.jpg"  //默认头像
-		if(userInstance.btouxiang){//登录后，判断是否有头像
-			def tSize = "btouxiang" //选择头像的类型，这里是大头像
-			def tIndex = userInstance."${tSize}"?.indexOf("touxiang") 
-			def touxiang =  userInstance."${tSize}"?.substring(tIndex)
-			touxiangUrl = touxiang?.replace('\\', '/');            
-        }
 		
-		[ownInstanceList: ownList, ownInstanceTotal: ownCount,categoryInstanceList: categoryList,shiroUserInstance:touxiangUrl]
+		
+		[ownInstanceList: ownList, ownInstanceTotal: ownCount,categoryInstanceList: categoryList]
 			
 		
 		}

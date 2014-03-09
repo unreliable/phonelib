@@ -94,7 +94,7 @@ text-decoration: none;
 		<div class="span9">
 			
 			<div id="list-book" class="content scaffold-list" role="main">
-			<h1>图书列表</h1>
+			<h1>我的图书</h1>
 			
 			 <g:form class="form-search" action="search">
 				&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:red;">new:</span><g:link action="create">创建一本新书</g:link>&nbsp;&nbsp;&nbsp;&nbsp;   <g:textField name="bookName" />

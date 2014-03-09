@@ -17,7 +17,12 @@ var t=setTimeout("load()",10)
 				<span class="icon-bar"></span> <span class="icon-bar"></span> <span
 					class="icon-bar"></span>
 			</button>
-			<a class="brand" href="/phonelibV2/">手机图书馆</a>
+			<shiro:isNotLoggedIn>
+				<a class="brand" href="/phonelibV2/">手机图书馆</a>
+			</shiro:isNotLoggedIn>
+			<shiro:isLoggedIn>
+							<a class="brand" href="/phonelibV2/own/list">手机图书馆</a>
+			</shiro:isLoggedIn>
 			<div class="nav-collapse collapse">
 				<ul class="nav">
 					<li class="divider-vertical"></li>
@@ -25,15 +30,26 @@ var t=setTimeout("load()",10)
 						<li class="active">
 					</g:if>
 					<g:else><li></g:else>
+					<shiro:isNotLoggedIn>
 								<a href="/phonelibV2/">首页</a>
-						</li>
-					<li class="divider-vertical"></li>
+								<li class="divider-vertical"></li>
+					</shiro:isNotLoggedIn>
+						
+					
 					<g:if test="${params.controller=="book"}">
 						<li class="active">
 					</g:if>
 					<g:else><li></g:else>
-					<a href="/phonelibV2/book/list">馆藏图书</a></li>
+					<a href="/phonelibV2/book/list">附近图书</a></li>
 					<li class="divider-vertical"></li>
+					
+					<g:if test="${params.controller=="libbook"}">
+						<li class="active">
+					</g:if>
+					<g:else><li></g:else>
+					<a href="/phonelibV2/libbook/list">城院图书馆</a></li>
+					<li class="divider-vertical"></li>
+					
 					<shiro:hasRole name="ROLE_ADMIN">
 						<li><a href="/phonelibV2/shiroUser/list">用户管理</a></li>
 						<li class="divider-vertical"></li>
